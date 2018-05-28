@@ -14,8 +14,8 @@ display_width = 800
 display_height = 600
 boundX = display_width - (block_size * 2)
 boundY = display_height - (block_size * 2)
-scoreOffsetX = 130
-scoreOffsetY = 20
+scoreOffsetX = 150
+scoreOffsetY = 25
 FPS = 15
 
 degrees = 270
@@ -30,6 +30,7 @@ snakeList = []
 
 bodyFont = pygame.font.SysFont("comicsansms", 50)
 snakeHeadImage = pygame.image.load("SnakeHead.png")
+snakeBodyImage = pygame.image.load("SnakeBody.png")
 appleImage = pygame.image.load("Apple.png")
 icon = pygame.image.load("Icon.png")
 
@@ -85,7 +86,7 @@ def pause():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 return
 
-        put_message_center("Game Paused", black, fontSize=30)
+        put_message_center("Game Paused", black, )
         put_message_custom("Click to resume..", black, fontSize=30, offsetY=50)
         pygame.display.update()
 
@@ -93,12 +94,12 @@ def pause():
 def randomApple():
     global randAppleX
     global randAppleY
-    randAppleX = round(random.randint(block_size, display_width - scoreOffsetX - (block_size * 2)) / block_size) * \
+    randAppleX = round(random.randint(block_size, boundX - scoreOffsetX - (block_size * 2)) / block_size) * \
                  block_size
-    randAppleY = round(random.randint(block_size, display_height - scoreOffsetY - (block_size * 2)) / block_size) * \
+    randAppleY = round(random.randint(block_size, boundY - scoreOffsetY - (block_size * 2)) / block_size) * \
                  block_size
 
-    while randAppleX in snakeList and lead_y in snakeList:
+    while any(randAppleX in sublist for sublist in snakeList) and any(randAppleY in sublist for sublist in snakeList):
         randAppleX = round(random.randint(block_size, display_width - scoreOffsetX - (block_size * 2)) / block_size) * \
                      block_size
         randAppleY = round(random.randint(block_size, display_height - 30 - (block_size * 2)) / block_size) * block_size
@@ -110,7 +111,7 @@ def snake(snakeList):
     gameDisplay.blit(rotatedHead, (snakeList[-1][0], snakeList[-1][1]))
 
     for coor in snakeList[:-1]:
-        gameDisplay.fill(green, [coor[0], coor[1], block_size, block_size])
+        gameDisplay.blit(snakeBodyImage, [coor[0], coor[1]])
 
 
 def put_message_center(message, color):
@@ -134,35 +135,36 @@ def fillBackground():
     gameDisplay.fill(black)
     gameDisplay.fill(white, [block_size, block_size, boundX, boundY])
 
+
 def reset():
+    global appleCounter
     global degrees
-    global randAppleX
-    global randAppleY
+    global highScore
     global lead_x
     global lead_y
     global lead_x_change
     global lead_y_change
-    global appleCounter
-    global highScore
+    global randAppleX
+    global randAppleY
     global snakeList
 
     degrees = 270
-    randAppleX, randAppleY, appleCounter = (0,) * 3
     lead_x = display_width / 2
     lead_y = display_height / 2
     lead_x_change = block_size
     lead_y_change = 0
+    randAppleX, randAppleY, appleCounter = (0,) * 3
     snakeList = []
 
 
 def gameLoop():
+    global appleCounter
+    global degrees
+    global highScore
     global lead_x
     global lead_y
     global lead_x_change
     global lead_y_change
-    global degrees
-    global appleCounter
-    global highScore
     global snakeList
     lead_x_change = block_size
     lead_y_change = 0
@@ -196,19 +198,19 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 quitProgram()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     lead_x_change = -block_size
                     lead_y_change = 0
                     degrees = 90
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     lead_x_change = block_size
                     lead_y_change = 0
                     degrees = 270
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_UP or event.key == pygame.K_w:
                     lead_y_change = -block_size
                     lead_x_change = 0
                     degrees = 0
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     lead_y_change = block_size
                     lead_x_change = 0
                     degrees = 180
@@ -243,5 +245,6 @@ def gameLoop():
         showScores(appleCounter, highScore < appleCounter)
         pygame.display.update()
         clock.tick(FPS)
+
 
 startScreen()
