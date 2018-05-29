@@ -1,14 +1,16 @@
 import pygame
 import random
-import pickle
+import pickle  # pickle is used for high score saving
 
 pygame.init()
 
+# Color definitions
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 green = (0, 155, 0)
 
+# Game property constants
 block_size = 20
 display_width = 800
 display_height = 600
@@ -18,8 +20,10 @@ scoreOffsetX = 150
 scoreOffsetY = 25
 FPS = 15
 
+# Game variables
 degrees = 270
 randAppleX, randAppleY = (0,) * 2
+goldenApple = random.randint(1, 10) == 10
 lead_x = display_width / 2
 lead_y = display_height / 2
 lead_x_change = block_size
@@ -28,17 +32,25 @@ appleCounter = 0
 highScore = 0
 snakeList = []
 
+# Importing font
 bodyFont = pygame.font.SysFont("comicsansms", 50)
+
+# Importing images
 snakeHeadImage = pygame.image.load("SnakeHead.png")
 snakeBodyImage = pygame.image.load("SnakeBody.png")
 appleImage = pygame.image.load("Apple.png")
+goldenAppleImage = pygame.image.load("GoldenApple.png")
 icon = pygame.image.load("Icon.png")
 
+
+# Configuring display
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Snake")
 pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
 
+
+# High score loading
 try:
     with open('score.dat', 'rb') as file:
         highScore = pickle.load(file)
@@ -49,6 +61,10 @@ except:
 
 
 def startScreen():
+    """
+    This function loads the start screen of the game.
+    :return:
+    """
     while True:
         fillBackground()
         put_message_center("Welcome to Snake!", green)
@@ -66,6 +82,12 @@ def startScreen():
 
 
 def showScores(score, new):
+    """
+    This function displays the scores on the display.
+    :param score:
+    :param new:
+    :return:
+    """
     screen_text = pygame.font.SysFont("comicsansms", 15).render("Score: " + str(score), True, black)
     gameDisplay.blit(screen_text, (display_width - scoreOffsetX, scoreOffsetY + 20))
 
@@ -78,12 +100,16 @@ def showScores(score, new):
 
 
 def pause():
+    """
+    This function handles the paused event.
+    :return:
+    """
     while True:
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 quitProgram()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN or event.key == pygame.K_p:
                 return
 
         put_message_center("Game Paused", black, )
@@ -92,20 +118,42 @@ def pause():
 
 
 def randomApple():
+    """
+    This function handles the random apple generation.
+    :return:
+    """
     global randAppleX
     global randAppleY
-    randAppleX = round(random.randint(block_size, boundX - scoreOffsetX - (block_size * 2)) / block_size) * \
+    global goldenApple
+
+    goldenApple = generateGoldenApple()
+
+    randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
                  block_size
-    randAppleY = round(random.randint(block_size, boundY - scoreOffsetY - (block_size * 2)) / block_size) * \
+    randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
                  block_size
 
-    while any(randAppleX in sublist for sublist in snakeList) and any(randAppleY in sublist for sublist in snakeList):
-        randAppleX = round(random.randint(block_size, display_width - scoreOffsetX - (block_size * 2)) / block_size) * \
+    while any(randAppleX in sublist for sublist in snakeList) or any(randAppleY in sublist for sublist in snakeList):
+        randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
                      block_size
-        randAppleY = round(random.randint(block_size, display_height - 30 - (block_size * 2)) / block_size) * block_size
+        randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
+                     block_size
+
+
+def generateGoldenApple():
+    """
+    This function returns if a golden apple should be generated or not.
+    :return:
+    """
+    return random.randint(1, 20) == 1
 
 
 def snake(snakeList):
+    """
+    This function handles blitting the snake and rotating the head of the snake.
+    :param snakeList:
+    :return:
+    """
     rotatedHead = pygame.transform.rotate(snakeHeadImage, degrees)
 
     gameDisplay.blit(rotatedHead, (snakeList[-1][0], snakeList[-1][1]))
@@ -115,28 +163,54 @@ def snake(snakeList):
 
 
 def put_message_center(message, color):
+    """
+    This function displays a message in the center of the screen.
+    :param message:
+    :param color:
+    :return:
+    """
     screen_text = bodyFont.render(message, True, color)
     gameDisplay.blit(screen_text, [(display_width / 2) - (screen_text.get_rect().width / 2),
                                    (display_height / 2) - (screen_text.get_rect().height / 2)])
 
 
 def put_message_custom(message, color, offsetY, fontSize=50):
+    """
+    This function puts a message on the screen based off an offset to the center.
+    :param message:
+    :param color:
+    :param offsetY:
+    :param fontSize:
+    :return:
+    """
     screen_text = pygame.font.SysFont("comicsansms", fontSize).render(message, True, color)
     gameDisplay.blit(screen_text, [(display_width / 2) - (screen_text.get_rect().width / 2),
                                    ((display_height / 2) - (screen_text.get_rect().height / 2) + offsetY)])
 
 
 def quitProgram():
+    """
+    This function quits the program.
+    :return:
+    """
     pygame.quit()
     exit()
 
 
 def fillBackground():
+    """
+    This function fills the game display background.
+    :return:
+    """
     gameDisplay.fill(black)
     gameDisplay.fill(white, [block_size, block_size, boundX, boundY])
 
 
 def reset():
+    """
+    This function resets all the variables to their default value (i.e. starting a new game)
+    :return:
+    """
     global appleCounter
     global degrees
     global highScore
@@ -147,6 +221,7 @@ def reset():
     global randAppleX
     global randAppleY
     global snakeList
+    global goldenApple
 
     degrees = 270
     lead_x = display_width / 2
@@ -155,9 +230,15 @@ def reset():
     lead_y_change = 0
     randAppleX, randAppleY, appleCounter = (0,) * 3
     snakeList = []
+    goldenApple = generateGoldenApple()
+
 
 
 def gameLoop():
+    """
+    This is the main game loop, called by startScreen() earlier.
+    :return:
+    """
     global appleCounter
     global degrees
     global highScore
@@ -166,17 +247,21 @@ def gameLoop():
     global lead_x_change
     global lead_y_change
     global snakeList
+    global goldenApple
     lead_x_change = block_size
     lead_y_change = 0
     gameOver = False
+    goldenApple = generateGoldenApple()
 
     randomApple()
 
     while True:
         events = pygame.event.get()
+        fillBackground()
 
-        while gameOver:
+        while gameOver:  # the user lost
             if highScore < appleCounter:
+                # set new high score if applicable
                 with open('score.dat', 'rb') as file:
                     highScore = pickle.load(file)
                 with open('score.dat', 'wb') as file:
@@ -221,30 +306,37 @@ def gameLoop():
         lead_y += lead_y_change
 
         if lead_x == randAppleX and lead_y == randAppleY:
+            if goldenApple:
+                appleCounter += 3
+            else:
+                appleCounter += 1
             randomApple()
-            appleCounter += 1
 
-        fillBackground()
-        gameDisplay.blit(appleImage, (randAppleX, randAppleY))
+        snakeHead = [lead_x, lead_y]  # updates the snake's head location
 
-        snakeHead = [lead_x, lead_y]
+        # checks if a golden apple should be generated
+        if goldenApple:
+            gameDisplay.blit(goldenAppleImage, (randAppleX, randAppleY))
+        else:
+            gameDisplay.blit(appleImage, (randAppleX, randAppleY))
 
+        # condition checking if the snake has run into itself or gone out of bounds
         if snakeHead in snakeList[:-1] or \
                 (lead_x > boundX or lead_x < block_size or lead_y > boundY or lead_y < block_size):
             gameOver = True
 
-        snakeList.append(snakeHead)
-        snake(snakeList)
+        snakeList.append(snakeHead)  # add the snakeHead
+        snake(snakeList)             # generate the snake
 
-        if len(snakeList) > appleCounter:
+        if len(snakeList) > appleCounter:  # delete the first element of the snakeList.
             del snakeList[0]
 
-        with open('score.dat', 'rb') as file:
+        with open('score.dat', 'rb') as file:  # load high score
             highScore = pickle.load(file)
 
         showScores(appleCounter, highScore < appleCounter)
         pygame.display.update()
-        clock.tick(FPS)
+        clock.tick(FPS)  # set FPS
 
 
 startScreen()
