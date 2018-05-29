@@ -18,7 +18,7 @@ boundX = display_width - (block_size * 2)
 boundY = display_height - (block_size * 2)
 scoreOffsetX = 150
 scoreOffsetY = 25
-FPS = 15
+FPS = 12
 
 # Game variables
 degrees = 270
@@ -109,7 +109,7 @@ def pause():
         for event in events:
             if event.type == pygame.QUIT:
                 quitProgram()
-            if event.type == pygame.MOUSEBUTTONDOWN or event.key == pygame.K_p:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 return
 
         put_message_center("Game Paused", black, )
@@ -133,19 +133,18 @@ def randomApple():
     randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
                  block_size
 
-    while any(randAppleX in sublist for sublist in snakeList) or any(randAppleY in sublist for sublist in snakeList):
+    while [randAppleX, randAppleY] in snakeList:
         randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
                      block_size
         randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
                      block_size
 
-
 def generateGoldenApple():
     """
-    This function returns if a golden apple should be generated or not.
+    this function returns if a golden apple should be generated or not.
     :return:
     """
-    return random.randint(1, 20) == 1
+    return random.randint(1, 15) == 1
 
 
 def snake(snakeList):
@@ -159,7 +158,8 @@ def snake(snakeList):
     gameDisplay.blit(rotatedHead, (snakeList[-1][0], snakeList[-1][1]))
 
     for coor in snakeList[:-1]:
-        gameDisplay.blit(snakeBodyImage, [coor[0], coor[1]])
+        rotatedSnakeBodyImage = pygame.transform.rotate(snakeBodyImage, degrees)
+        gameDisplay.blit(rotatedSnakeBodyImage, [coor[0], coor[1]])
 
 
 def put_message_center(message, color):
@@ -248,6 +248,7 @@ def gameLoop():
     global lead_y_change
     global snakeList
     global goldenApple
+    global FPS
     lead_x_change = block_size
     lead_y_change = 0
     gameOver = False
@@ -336,7 +337,7 @@ def gameLoop():
 
         showScores(appleCounter, highScore < appleCounter)
         pygame.display.update()
-        clock.tick(FPS)  # set FPS
+        clock.tick(FPS + int(appleCounter / 10))  # set FPS
 
 
 startScreen()
