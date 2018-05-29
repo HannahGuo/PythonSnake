@@ -36,11 +36,11 @@ snakeList = []
 bodyFont = pygame.font.SysFont("comicsansms", 50)
 
 # Importing images
-snakeHeadImage = pygame.image.load("SnakeHead.png")
-snakeBodyImage = pygame.image.load("SnakeBody.png")
-appleImage = pygame.image.load("Apple.png")
-goldenAppleImage = pygame.image.load("GoldenApple.png")
-icon = pygame.image.load("Icon.png")
+snakeHeadImage = pygame.image.load("images/SnakeHead.png")
+snakeBodyImage = pygame.image.load("images/SnakeBody.png")
+appleImage = pygame.image.load("images/Apple.png")
+goldenAppleImage = pygame.image.load("images/GoldenApple.png")
+icon = pygame.image.load("images/Icon.png")
 
 
 # Configuring display
@@ -158,8 +158,7 @@ def snake(snakeList):
     gameDisplay.blit(rotatedHead, (snakeList[-1][0], snakeList[-1][1]))
 
     for coor in snakeList[:-1]:
-        rotatedSnakeBodyImage = pygame.transform.rotate(snakeBodyImage, degrees)
-        gameDisplay.blit(rotatedSnakeBodyImage, [coor[0], coor[1]])
+        gameDisplay.blit(snakeBodyImage, [coor[0], coor[1]])
 
 
 def put_message_center(message, color):
@@ -284,19 +283,19 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 quitProgram()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                if (len(snakeList) < 2 or degrees != 270) and (event.key == pygame.K_LEFT or event.key == pygame.K_a):
                     lead_x_change = -block_size
                     lead_y_change = 0
                     degrees = 90
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                elif (len(snakeList) < 2 or degrees != 90) and (event.key == pygame.K_RIGHT or event.key == pygame.K_d):
                     lead_x_change = block_size
                     lead_y_change = 0
                     degrees = 270
-                elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                elif (len(snakeList) < 2 or degrees != 180) and (event.key == pygame.K_UP or event.key == pygame.K_w):
                     lead_y_change = -block_size
                     lead_x_change = 0
                     degrees = 0
-                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                elif (len(snakeList) < 2 or degrees != 0) and (event.key == pygame.K_DOWN or event.key == pygame.K_s):
                     lead_y_change = block_size
                     lead_x_change = 0
                     degrees = 180
