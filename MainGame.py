@@ -16,8 +16,11 @@ display_width = 800
 display_height = 600
 boundX = display_width - (block_size * 2)
 boundY = display_height - (block_size * 2)
-scoreOffsetX = 150
-scoreOffsetY = 25
+scoreOffsetX = 140
+scoreOffsetY = 27
+scoreBoundWidth = display_width - 180
+scoreBoundHeight = 100 - block_size
+
 FPS = 12
 
 # Game variables
@@ -64,7 +67,7 @@ def startScreen():
     :return:
     """
     while True:
-        fillBackground()
+        fillBackground(True)
         put_message_center("Welcome to Snake!", green)
         put_message_custom("Click to play.", black, fontSize=30, offsetY=50)
         pygame.display.update()
@@ -124,18 +127,25 @@ def randomApple():
     global randAppleY
     global goldenApple
 
+    lastAppleX = randAppleX
+    lastAppleY = randAppleY
+
     goldenApple = generateGoldenApple()
 
-    randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
+    randAppleX = round(random.randint(block_size * 2, boundX - (block_size * 4)) / block_size) * \
                  block_size
-    randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
+    randAppleY = round(random.randint(block_size * 2, boundY - (block_size * 4)) / block_size) * \
                  block_size
 
-    while [randAppleX, randAppleY] in snakeList:  # if the apple generates under the snake, regenerate it
-        randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
+    while [randAppleX, randAppleY] in snakeList or randAppleX == lastAppleX or randAppleY == lastAppleY or \
+            (randAppleX >= scoreBoundWidth and randAppleY <= scoreBoundHeight):
+        # if the apple generates under the snake or within the high score box, regenerate it
+        randAppleX = round(random.randint(block_size * 2, boundX - scoreBoundWidth - (block_size * 4)) / block_size) * \
                      block_size
-        randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
+        randAppleY = round(random.randint(block_size * 2, boundY - scoreBoundHeight - (block_size * 4)) / block_size) * \
                      block_size
+
+    print(str(randAppleY) + " " + str(randAppleX))
 
 
 def generateGoldenApple():
@@ -195,13 +205,17 @@ def quitProgram():
     exit()
 
 
-def fillBackground():
+def fillBackground(startScreen):
     """
     This function fills the game display background.
     :return:
     """
     gameDisplay.fill(black)
     gameDisplay.fill(white, [block_size, block_size, boundX, boundY])
+
+    if not startScreen:
+        gameDisplay.fill(black, [scoreBoundWidth, block_size, display_width - 150, scoreBoundHeight])
+        gameDisplay.fill(white, [(scoreBoundWidth + block_size, block_size), (block_size * 7, 100 - (block_size * 2))])
 
 
 def reset():
@@ -255,7 +269,7 @@ def gameLoop():
 
     while True:
         events = pygame.event.get()
-        fillBackground()
+        fillBackground(False)
 
         while gameOver:  # the user lost
             if highScore < appleCounter:
@@ -271,7 +285,7 @@ def gameLoop():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     reset()
                     gameLoop()
-            fillBackground()
+            fillBackground(False)
             showScores(appleCounter, highScore < appleCounter)
             put_message_center("Game Over!", red)
             put_message_custom("Click to play again.", black, fontSize=30, offsetY=50)
@@ -320,7 +334,8 @@ def gameLoop():
 
         # condition checking if the snake has run into itself or gone out of bounds
         if snakeHead in snakeList[:-1] or \
-                (lead_x > boundX or lead_x < block_size or lead_y > boundY or lead_y < block_size):
+                (lead_x > boundX or lead_x < block_size or lead_y > boundY or lead_y < block_size)\
+                or (lead_x >= scoreBoundWidth and lead_y <= scoreBoundHeight):
             gameOver = True
 
         snakeList.append(snakeHead)  # add the snakeHead
