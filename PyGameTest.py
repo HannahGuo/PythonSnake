@@ -42,13 +42,11 @@ appleImage = pygame.image.load("images/Apple.png")
 goldenAppleImage = pygame.image.load("images/GoldenApple.png")
 icon = pygame.image.load("images/Icon.png")
 
-
 # Configuring display
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Snake")
 pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
-
 
 # High score loading
 try:
@@ -133,11 +131,12 @@ def randomApple():
     randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
                  block_size
 
-    while [randAppleX, randAppleY] in snakeList:
+    while [randAppleX, randAppleY] in snakeList:  # if the apple generates under the snake, regenerate it
         randAppleX = round(random.randint(block_size * 2, boundX - scoreOffsetX - (block_size * 4)) / block_size) * \
                      block_size
         randAppleY = round(random.randint(block_size * 2, boundY - scoreOffsetY - (block_size * 4)) / block_size) * \
                      block_size
+
 
 def generateGoldenApple():
     """
@@ -232,7 +231,6 @@ def reset():
     goldenApple = generateGoldenApple()
 
 
-
 def gameLoop():
     """
     This is the main game loop, called by startScreen() earlier.
@@ -282,7 +280,7 @@ def gameLoop():
         for event in events:
             if event.type == pygame.QUIT:
                 quitProgram()
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:  # key presses
                 if (len(snakeList) < 2 or degrees != 270) and (event.key == pygame.K_LEFT or event.key == pygame.K_a):
                     lead_x_change = -block_size
                     lead_y_change = 0
@@ -305,7 +303,7 @@ def gameLoop():
         lead_x += lead_x_change
         lead_y += lead_y_change
 
-        if lead_x == randAppleX and lead_y == randAppleY:
+        if lead_x == randAppleX and lead_y == randAppleY:  # if the snake has eaten the apple
             if goldenApple:
                 appleCounter += 3
             else:
@@ -326,7 +324,7 @@ def gameLoop():
             gameOver = True
 
         snakeList.append(snakeHead)  # add the snakeHead
-        snake(snakeList)             # generate the snake
+        snake(snakeList)  # generate the snake
 
         if len(snakeList) > appleCounter:  # delete the first element of the snakeList.
             del snakeList[0]
@@ -336,7 +334,7 @@ def gameLoop():
 
         showScores(appleCounter, highScore < appleCounter)
         pygame.display.update()
-        clock.tick(FPS + int(appleCounter / 10))  # set FPS
+        clock.tick(FPS + appleCounter / 10)  # set FPS, scales with how many apples the user has
 
 
 startScreen()
