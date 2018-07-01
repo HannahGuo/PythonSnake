@@ -118,7 +118,7 @@ def showScores(score, new):
     high_score = pygame.font.SysFont("comicsansms", 15).render("High Score: " + str(highScore), True, black)
 
     if new:
-        high_score = pygame.font.SysFont("comicsansms", 15).render("New High Score!", True, red)
+        high_score = pygame.font.SysFont("comicsansms", 13).render("New High Score!", True, red)
 
     gameDisplay.blit(high_score, (displayWidth - scoreOffsetX, scoreOffsetY))
 
